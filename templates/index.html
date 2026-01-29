@@ -9,8 +9,8 @@
     
     <style>
         :root {
-            --primary: #a29bfe; /* Elegant Lavender */
-            --secondary: #55efc4; /* Fresh Mint */
+            --primary: #a29bfe; 
+            --secondary: #55efc4; 
             --bg: #0d0d0f;
             --card-bg: rgba(255, 255, 255, 0.03);
             --accent: #ff7675;
@@ -37,6 +37,7 @@
             padding: 40px;
             border-radius: 32px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            margin-bottom: 50px;
         }
 
         h1 { font-weight: 700; font-size: 34px; margin: 0; background: linear-gradient(to right, #fff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -51,7 +52,7 @@
             transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .upload-card:hover { background: rgba(255,255,255,0.04); border-color: var(--primary); }
+        .upload-card:hover { border-color: var(--primary); background: rgba(255,255,255,0.04); }
 
         label { display: block; margin-bottom: 12px; font-size: 12px; font-weight: 700; color: var(--secondary); opacity: 0.8; }
 
@@ -62,6 +63,7 @@
             color: #fff;
             font-size: 15px;
             outline: none;
+            cursor: pointer;
         }
 
         button {
@@ -80,14 +82,15 @@
 
         button:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(255,255,255,0.1); }
 
-        /* --- REPORT STYLING --- */
         .report-section {
             margin-top: 40px;
             padding: 30px;
             background: #fff;
-            color: #1a1a1a; /* Paper look for the final report */
+            color: #1a1a1a;
             border-radius: 24px;
             animation: fadeIn 0.8s ease-out;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .report-header {
@@ -99,18 +102,20 @@
             align-items: center;
         }
 
+        .report-header h3 { margin: 0; font-size: 18px; color: #333; }
         .report-header span { font-weight: 800; color: var(--primary); font-size: 12px; }
 
-        /* Style for Markdown elements inside the report */
         .markdown-body h2 { color: #2d3436; font-size: 20px; margin-top: 20px; border-left: 4px solid var(--primary); padding-left: 10px; }
         .markdown-body p { margin: 10px 0; font-size: 15px; line-height: 1.6; }
+        .markdown-body ul { padding-left: 20px; }
         .markdown-body strong { color: #d63031; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Loading Animation */
         .loading { animation: pulse 1.5s infinite; pointer-events: none; opacity: 0.6; }
         @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 0.3; } 100% { opacity: 0.6; } }
+
+        #errorDisplay { color: var(--accent); margin-top: 20px; font-weight: bold; font-size: 14px; display: none; }
     </style>
 </head>
 <body>
@@ -119,15 +124,15 @@
     <h1>VITISENSE <span style="font-weight: 300;">V3</span></h1>
     <div class="subtitle">Next-Gen Agricultural Intelligence</div>
 
-    <form method="POST" enctype="multipart/form-data" id="mainForm">
+    <form id="mainForm" enctype="multipart/form-data">
         <div class="upload-card">
             <label>🍃 Foliar Diagnosis (Leaf Image)</label>
-            <input type="file" name="leaf_image" required>
+            <input type="file" name="leaf_image" accept="image/*" required>
         </div>
 
         <div class="upload-card">
             <label>🍇 Cluster Analysis (Grape Image)</label>
-            <input type="file" name="grape_image" required>
+            <input type="file" name="grape_image" accept="image/*" required>
         </div>
 
         <div class="upload-card">
@@ -138,35 +143,97 @@
         <button type="submit" id="analyzeBtn">GENERATE ADVISORY REPORT</button>
     </form>
 
+    <div id="errorDisplay"></div>
+
     {% if result %}
-    <div class="report-section" id="reportSection">
+    <div class="report-section" id="staticReport">
         <div class="report-header">
             <h3>OFFICIAL DIAGNOSTIC REPORT</h3>
             <span>ID: #{{ range(1000, 9999) | random }}</span>
         </div>
-        <div class="markdown-body" id="reportContent">
-            <div id="rawReport" style="display:none;">{{ report }}</div>
+        <div class="markdown-body" id="staticContent">
+            {{ report }}
         </div>
     </div>
     {% endif %}
+
+    <div id="dynamicReportRoot"></div>
 </div>
 
 <script>
-    // 1. Handle Markdown Rendering
+    const RENDER_URL = "https://vitisense-backend-gmk8.onrender.com";
+    const mainForm = document.getElementById('mainForm');
+    const btn = document.getElementById('analyzeBtn');
+    const errorDisplay = document.getElementById('errorDisplay');
+
+    // 1. Initial Markdown Rendering (for Render-based loads)
     window.onload = function() {
-        const rawData = document.getElementById('rawReport');
-        if (rawData) {
-            const htmlContent = marked.parse(rawData.innerHTML);
-            document.getElementById('reportContent').innerHTML = htmlContent;
+        const staticContent = document.getElementById('staticContent');
+        if (staticContent) {
+            staticContent.innerHTML = marked.parse(staticContent.innerText);
         }
     };
 
-    // 2. Button Loading State
-    document.getElementById('mainForm').onsubmit = function() {
-        const btn = document.getElementById('analyzeBtn');
+    // 2. Fetch-based Submission (for Netlify/Cross-domain loads)
+    mainForm.onsubmit = async function(e) {
+        e.preventDefault();
+        
         btn.innerHTML = "NEURAL PROCESSING...";
         btn.classList.add('loading');
+        errorDisplay.style.display = 'none';
+
+        const formData = new FormData(mainForm);
+
+        try {
+            const response = await fetch(RENDER_URL, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) throw new Error("Server error or API quota reached.");
+
+            const htmlResponse = await response.text();
+            
+            // Extract the report from the returned HTML
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlResponse, 'text/html');
+            const reportData = doc.getElementById('rawReport') ? doc.getElementById('rawReport').innerText : "";
+            
+            // If the backend sent a rawReport div (from our app.py logic)
+            if (reportData) {
+                renderReport(reportData);
+            } else {
+                // Fallback: If your app.py doesn't use the 'rawReport' hidden div, 
+                // we assume it just returns the whole page and we extract the text.
+                // For your specific app.py, this creates a clean UI injection:
+                location.reload(); 
+            }
+
+        } catch (err) {
+            errorDisplay.innerText = "Error: " + err.message;
+            errorDisplay.style.display = 'block';
+            btn.innerHTML = "GENERATE ADVISORY REPORT";
+            btn.classList.remove('loading');
+        }
     };
+
+    function renderReport(content) {
+        const root = document.getElementById('dynamicReportRoot');
+        const reportId = Math.floor(Math.random() * 8999) + 1000;
+        
+        root.innerHTML = `
+            <div class="report-section">
+                <div class="report-header">
+                    <h3>OFFICIAL DIAGNOSTIC REPORT</h3>
+                    <span>ID: #${reportId}</span>
+                </div>
+                <div class="markdown-body">${marked.parse(content)}</div>
+            </div>
+        `;
+        btn.innerHTML = "GENERATE ADVISORY REPORT";
+        btn.classList.remove('loading');
+        root.scrollIntoView({ behavior: 'smooth' });
+    }
 </script>
 
 </body>

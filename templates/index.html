@@ -91,6 +91,7 @@
             animation: fadeIn 0.8s ease-out;
             width: 100%;
             box-sizing: border-box;
+            display: none; /* Hidden by default until result is ready */
         }
 
         .report-header {
@@ -108,14 +109,10 @@
         .markdown-body h2 { color: #2d3436; font-size: 20px; margin-top: 20px; border-left: 4px solid var(--primary); padding-left: 10px; }
         .markdown-body p { margin: 10px 0; font-size: 15px; line-height: 1.6; }
         .markdown-body ul { padding-left: 20px; }
-        .markdown-body strong { color: #d63031; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-
         .loading { animation: pulse 1.5s infinite; pointer-events: none; opacity: 0.6; }
         @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 0.3; } 100% { opacity: 0.6; } }
-
-        #errorDisplay { color: var(--accent); margin-top: 20px; font-weight: bold; font-size: 14px; display: none; }
     </style>
 </head>
 <body>
@@ -143,44 +140,41 @@
         <button type="submit" id="analyzeBtn">GENERATE ADVISORY REPORT</button>
     </form>
 
-    <div id="errorDisplay"></div>
+    <div id="rawReport" style="display:none;">{{ report if result else "" }}</div>
 
-    {% if result %}
-    <div class="report-section" id="staticReport">
+    <div class="report-section" id="reportSection">
         <div class="report-header">
             <h3>OFFICIAL DIAGNOSTIC REPORT</h3>
-            <span>ID: #{{ range(1000, 9999) | random }}</span>
+            <span id="reportIdDisplay">ID: #0000</span>
         </div>
-        <div class="markdown-body" id="staticContent">
-            {{ report }}
-        </div>
+        <div class="markdown-body" id="reportContent">
+            </div>
     </div>
-    {% endif %}
-
-    <div id="dynamicReportRoot"></div>
 </div>
 
 <script>
     const RENDER_URL = "https://vitisense-backend-gmk8.onrender.com";
     const mainForm = document.getElementById('mainForm');
     const btn = document.getElementById('analyzeBtn');
-    const errorDisplay = document.getElementById('errorDisplay');
+    const reportSection = document.getElementById('reportSection');
+    const reportContent = document.getElementById('reportContent');
 
-    // 1. Initial Markdown Rendering (for Render-based loads)
+    // 1. Check if we already have a result (on page load from Render)
     window.onload = function() {
-        const staticContent = document.getElementById('staticContent');
-        if (staticContent) {
-            staticContent.innerHTML = marked.parse(staticContent.innerText);
+        const rawData = document.getElementById('rawReport').textContent;
+        if (rawData.trim().length > 0) {
+            reportContent.innerHTML = marked.parse(rawData);
+            reportSection.style.display = 'block';
         }
     };
 
-    // 2. Fetch-based Submission (for Netlify/Cross-domain loads)
+    // 2. Dynamic Fetch Submission (for Netlify/Cross-domain)
     mainForm.onsubmit = async function(e) {
         e.preventDefault();
         
         btn.innerHTML = "NEURAL PROCESSING...";
         btn.classList.add('loading');
-        errorDisplay.style.display = 'none';
+        reportSection.style.display = 'none';
 
         const formData = new FormData(mainForm);
 
@@ -190,50 +184,27 @@
                 body: formData
             });
 
-            if (!response.ok) throw new Error("Server error or API quota reached.");
-
             const htmlResponse = await response.text();
             
-            // Extract the report from the returned HTML
+            // Extract only the report text from the HTML returned by Flask
             const parser = new DOMParser();
             const doc = parser.parseFromString(htmlResponse, 'text/html');
-            const reportData = doc.getElementById('rawReport') ? doc.getElementById('rawReport').innerText : "";
-            
-            // If the backend sent a rawReport div (from our app.py logic)
-            if (reportData) {
-                renderReport(reportData);
-            } else {
-                // Fallback: If your app.py doesn't use the 'rawReport' hidden div, 
-                // we assume it just returns the whole page and we extract the text.
-                // For your specific app.py, this creates a clean UI injection:
-                location.reload(); 
-            }
+            const newReport = doc.getElementById('rawReport').textContent;
 
-        } catch (err) {
-            errorDisplay.innerText = "Error: " + err.message;
-            errorDisplay.style.display = 'block';
+            if (newReport) {
+                reportContent.innerHTML = marked.parse(newReport);
+                document.getElementById('reportIdDisplay').innerText = "ID: #" + Math.floor(1000 + Math.random() * 9000);
+                reportSection.style.display = 'block';
+                reportSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("AI Connection Failed. Ensure your Render backend is live.");
+        } finally {
             btn.innerHTML = "GENERATE ADVISORY REPORT";
             btn.classList.remove('loading');
         }
     };
-
-    function renderReport(content) {
-        const root = document.getElementById('dynamicReportRoot');
-        const reportId = Math.floor(Math.random() * 8999) + 1000;
-        
-        root.innerHTML = `
-            <div class="report-section">
-                <div class="report-header">
-                    <h3>OFFICIAL DIAGNOSTIC REPORT</h3>
-                    <span>ID: #${reportId}</span>
-                </div>
-                <div class="markdown-body">${marked.parse(content)}</div>
-            </div>
-        `;
-        btn.innerHTML = "GENERATE ADVISORY REPORT";
-        btn.classList.remove('loading');
-        root.scrollIntoView({ behavior: 'smooth' });
-    }
 </script>
 
 </body>

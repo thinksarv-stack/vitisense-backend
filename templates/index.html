@@ -6,6 +6,7 @@
     <title>VITISENSE Pro | AI Agronomist</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
     <style>
         :root { --primary: #a29bfe; --secondary: #55efc4; --bg: #0d0d0f; --card-bg: rgba(255, 255, 255, 0.03); --accent: #ff7675; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg); color: #f1f2f6; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
@@ -14,11 +15,11 @@
         .subtitle { color: #888; margin-bottom: 40px; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; }
         .upload-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; margin-bottom: 20px; }
         label { display: block; margin-bottom: 12px; font-size: 12px; font-weight: 700; color: var(--secondary); opacity: 0.8; }
-        input { width: 100%; background: transparent; border: none; color: #fff; outline: none; }
+        input { width: 100%; background: transparent; border: none; color: #fff; outline: none; cursor: pointer; }
         button { width: 100%; background: #fff; color: #000; border: none; padding: 20px; border-radius: 18px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-        .btn-pdf { background: var(--primary); color: white; margin-top: 20px; }
+        .btn-pdf { background: var(--primary); color: white; margin-top: 20px; display: none; }
         .report-section { margin-top: 40px; padding: 30px; background: #fff; color: #1a1a1a; border-radius: 24px; display: none; }
-        .report-header { border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .report-header { border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; }
         .markdown-body h2 { color: #2d3436; font-size: 18px; border-left: 4px solid var(--primary); padding-left: 10px; }
         .loading { animation: pulse 1.5s infinite; opacity: 0.6; }
         @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 0.3; } 100% { opacity: 0.6; } }
@@ -31,9 +32,9 @@
     <div class="subtitle">Next-Gen Agricultural Intelligence</div>
 
     <form id="mainForm" enctype="multipart/form-data">
-        <div class="upload-card"><label>🍃 Leaf Scan</label><input type="file" name="leaf_image" accept="image/*" required></div>
-        <div class="upload-card"><label>🍇 Fruit Scan</label><input type="file" name="grape_image" accept="image/*" required></div>
-        <div class="upload-card"><label>🧪 °Brix Value</label><input type="number" step="0.1" name="sugar" value="18.0"></div>
+        <div class="upload-card"><label>🍃 Leaf Pathology Scan</label><input type="file" name="leaf_image" accept="image/*" required></div>
+        <div class="upload-card"><label>🍇 Visual Ripeness Scan</label><input type="file" name="grape_image" accept="image/*" required></div>
+        <div class="upload-card"><label>🧪 Refractometer (°Brix)</label><input type="number" step="0.1" name="sugar" value="18.0"></div>
         <button type="submit" id="analyzeBtn">GENERATE ADVISORY REPORT</button>
     </form>
 
@@ -43,9 +44,9 @@
         <div class="report-header"><h3>OFFICIAL DIAGNOSTIC REPORT</h3><span id="reportIdDisplay">ID: #0000</span></div>
         <div class="markdown-body" id="reportContent"></div>
         
-        <form action="https://vitisense-backend-gmk8.onrender.com/download-report" method="POST">
+        <form id="pdfForm" action="https://vitisense-backend-gmk8.onrender.com/download-report" method="POST">
             <input type="hidden" name="report_content" id="pdfContent">
-            <button type="submit" class="btn-pdf">📥 DOWNLOAD DETAILED PDF</button>
+            <button type="submit" class="btn-pdf" id="pdfBtn">📥 DOWNLOAD DETAILED PDF</button>
         </form>
     </div>
 </div>
@@ -74,7 +75,7 @@
             const doc = parser.parseFromString(htmlResponse, 'text/html');
             const newReport = doc.getElementById('rawReport').textContent;
             if (newReport) { displayReport(newReport); }
-        } catch (error) { alert("AI Connection Failed."); }
+        } catch (error) { alert("AI Connection Failed. Ensure Render is awake."); }
         finally { btn.innerHTML = "GENERATE ADVISORY REPORT"; btn.classList.remove('loading'); }
     };
 
@@ -83,6 +84,7 @@
         document.getElementById('pdfContent').value = content;
         document.getElementById('reportIdDisplay').innerText = "ID: #" + Math.floor(1000 + Math.random() * 9000);
         reportSection.style.display = 'block';
+        document.getElementById('pdfBtn').style.display = 'block';
         reportSection.scrollIntoView({ behavior: 'smooth' });
     }
 </script>

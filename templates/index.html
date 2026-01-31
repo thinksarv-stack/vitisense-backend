@@ -6,112 +6,21 @@
     <title>VITISENSE Pro | AI Agronomist</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    
     <style>
-        :root {
-            --primary: #a29bfe; 
-            --secondary: #55efc4; 
-            --bg: #0d0d0f;
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --accent: #ff7675;
-        }
-
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg);
-            background-image: radial-gradient(circle at top right, #1a1a2e, transparent);
-            color: #f1f2f6;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .dashboard {
-            width: 100%;
-            max-width: 600px;
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 40px;
-            border-radius: 32px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            margin-bottom: 50px;
-        }
-
+        :root { --primary: #a29bfe; --secondary: #55efc4; --bg: #0d0d0f; --card-bg: rgba(255, 255, 255, 0.03); --accent: #ff7675; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg); color: #f1f2f6; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .dashboard { width: 100%; max-width: 600px; background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); padding: 40px; border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
         h1 { font-weight: 700; font-size: 34px; margin: 0; background: linear-gradient(to right, #fff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .subtitle { color: #888; margin-bottom: 40px; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; }
-
-        .upload-card {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.05);
-            padding: 20px;
-            border-radius: 20px;
-            margin-bottom: 20px;
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .upload-card:hover { border-color: var(--primary); background: rgba(255,255,255,0.04); }
-
+        .upload-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; margin-bottom: 20px; }
         label { display: block; margin-bottom: 12px; font-size: 12px; font-weight: 700; color: var(--secondary); opacity: 0.8; }
-
-        input[type="file"], input[type="number"] {
-            width: 100%;
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-size: 15px;
-            outline: none;
-            cursor: pointer;
-        }
-
-        button {
-            width: 100%;
-            background: #fff;
-            color: #000;
-            border: none;
-            padding: 20px;
-            border-radius: 18px;
-            font-size: 16px;
-            font-weight: 800;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: 0.3s;
-        }
-
-        button:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(255,255,255,0.1); }
-
-        .report-section {
-            margin-top: 40px;
-            padding: 30px;
-            background: #fff;
-            color: #1a1a1a;
-            border-radius: 24px;
-            animation: fadeIn 0.8s ease-out;
-            width: 100%;
-            box-sizing: border-box;
-            display: none; /* Hidden by default until result is ready */
-        }
-
-        .report-header {
-            border-bottom: 2px solid #eee;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .report-header h3 { margin: 0; font-size: 18px; color: #333; }
-        .report-header span { font-weight: 800; color: var(--primary); font-size: 12px; }
-
-        .markdown-body h2 { color: #2d3436; font-size: 20px; margin-top: 20px; border-left: 4px solid var(--primary); padding-left: 10px; }
-        .markdown-body p { margin: 10px 0; font-size: 15px; line-height: 1.6; }
-        .markdown-body ul { padding-left: 20px; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        .loading { animation: pulse 1.5s infinite; pointer-events: none; opacity: 0.6; }
+        input { width: 100%; background: transparent; border: none; color: #fff; outline: none; }
+        button { width: 100%; background: #fff; color: #000; border: none; padding: 20px; border-radius: 18px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .btn-pdf { background: var(--primary); color: white; margin-top: 20px; }
+        .report-section { margin-top: 40px; padding: 30px; background: #fff; color: #1a1a1a; border-radius: 24px; display: none; }
+        .report-header { border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .markdown-body h2 { color: #2d3436; font-size: 18px; border-left: 4px solid var(--primary); padding-left: 10px; }
+        .loading { animation: pulse 1.5s infinite; opacity: 0.6; }
         @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 0.3; } 100% { opacity: 0.6; } }
     </style>
 </head>
@@ -122,33 +31,22 @@
     <div class="subtitle">Next-Gen Agricultural Intelligence</div>
 
     <form id="mainForm" enctype="multipart/form-data">
-        <div class="upload-card">
-            <label>🍃 Foliar Diagnosis (Leaf Image)</label>
-            <input type="file" name="leaf_image" accept="image/*" required>
-        </div>
-
-        <div class="upload-card">
-            <label>🍇 Cluster Analysis (Grape Image)</label>
-            <input type="file" name="grape_image" accept="image/*" required>
-        </div>
-
-        <div class="upload-card">
-            <label>🧪 Refractometer Value (°Brix)</label>
-            <input type="number" step="0.1" name="sugar" value="18.0">
-        </div>
-
+        <div class="upload-card"><label>🍃 Leaf Scan</label><input type="file" name="leaf_image" accept="image/*" required></div>
+        <div class="upload-card"><label>🍇 Fruit Scan</label><input type="file" name="grape_image" accept="image/*" required></div>
+        <div class="upload-card"><label>🧪 °Brix Value</label><input type="number" step="0.1" name="sugar" value="18.0"></div>
         <button type="submit" id="analyzeBtn">GENERATE ADVISORY REPORT</button>
     </form>
 
     <div id="rawReport" style="display:none;">{{ report if result else "" }}</div>
 
     <div class="report-section" id="reportSection">
-        <div class="report-header">
-            <h3>OFFICIAL DIAGNOSTIC REPORT</h3>
-            <span id="reportIdDisplay">ID: #0000</span>
-        </div>
-        <div class="markdown-body" id="reportContent">
-            </div>
+        <div class="report-header"><h3>OFFICIAL DIAGNOSTIC REPORT</h3><span id="reportIdDisplay">ID: #0000</span></div>
+        <div class="markdown-body" id="reportContent"></div>
+        
+        <form action="https://vitisense-backend-gmk8.onrender.com/download-report" method="POST">
+            <input type="hidden" name="report_content" id="pdfContent">
+            <button type="submit" class="btn-pdf">📥 DOWNLOAD DETAILED PDF</button>
+        </form>
     </div>
 </div>
 
@@ -159,53 +57,34 @@
     const reportSection = document.getElementById('reportSection');
     const reportContent = document.getElementById('reportContent');
 
-    // 1. Check if we already have a result (on page load from Render)
     window.onload = function() {
         const rawData = document.getElementById('rawReport').textContent;
-        if (rawData.trim().length > 0) {
-            reportContent.innerHTML = marked.parse(rawData);
-            reportSection.style.display = 'block';
-        }
+        if (rawData.trim().length > 0) { displayReport(rawData); }
     };
 
-    // 2. Dynamic Fetch Submission (for Netlify/Cross-domain)
     mainForm.onsubmit = async function(e) {
         e.preventDefault();
-        
         btn.innerHTML = "NEURAL PROCESSING...";
         btn.classList.add('loading');
-        reportSection.style.display = 'none';
-
         const formData = new FormData(mainForm);
-
         try {
-            const response = await fetch(RENDER_URL, {
-                method: 'POST',
-                body: formData
-            });
-
+            const response = await fetch(RENDER_URL, { method: 'POST', body: formData });
             const htmlResponse = await response.text();
-            
-            // Extract only the report text from the HTML returned by Flask
             const parser = new DOMParser();
             const doc = parser.parseFromString(htmlResponse, 'text/html');
             const newReport = doc.getElementById('rawReport').textContent;
-
-            if (newReport) {
-                reportContent.innerHTML = marked.parse(newReport);
-                document.getElementById('reportIdDisplay').innerText = "ID: #" + Math.floor(1000 + Math.random() * 9000);
-                reportSection.style.display = 'block';
-                reportSection.scrollIntoView({ behavior: 'smooth' });
-            }
-        } catch (error) {
-            console.error("Error:", error);
-            alert("AI Connection Failed. Ensure your Render backend is live.");
-        } finally {
-            btn.innerHTML = "GENERATE ADVISORY REPORT";
-            btn.classList.remove('loading');
-        }
+            if (newReport) { displayReport(newReport); }
+        } catch (error) { alert("AI Connection Failed."); }
+        finally { btn.innerHTML = "GENERATE ADVISORY REPORT"; btn.classList.remove('loading'); }
     };
-</script>
 
+    function displayReport(content) {
+        reportContent.innerHTML = marked.parse(content);
+        document.getElementById('pdfContent').value = content;
+        document.getElementById('reportIdDisplay').innerText = "ID: #" + Math.floor(1000 + Math.random() * 9000);
+        reportSection.style.display = 'block';
+        reportSection.scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
 </body>
 </html>

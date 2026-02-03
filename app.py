@@ -15,7 +15,7 @@ app = Flask(__name__)
 CORS(app)
 
 # SETUP GEMINI CLIENT
-API_KEY = os.environ.get("GEMINI_API_KEY") 
+API_KEY = os.environ.get("GEMINI_API_KEY")
 client = genai.Client(api_key=API_KEY)
 
 @app.route('/', methods=['GET', 'POST'])
@@ -29,6 +29,7 @@ def index():
             leaf_img = Image.open(leaf_file)
             grape_img = Image.open(grape_file)
 
+            # Fixed Indentation for the Prompt
             prompt = f"""
             Act as a Senior Viticulturist and Plant Pathologist. 
             Analyze the uploaded leaf and fruit images meticulously. 
@@ -46,14 +47,16 @@ def index():
             Constraints: Use bullet points. Ensure every point contains 2-3 insightful, complete sentences.
             """
 
+            # Note: Changed to gemini-2.0-flash for current API stability
             response = client.models.generate_content(
-                model='gemini-2.5-flash',
+                model='gemini-2.0-flash',
                 contents=[prompt, leaf_img, grape_img]
             )
             
             return render_template('index.html', result=True, report=response.text)
 
         except Exception as e:
+            print(f"Server Error: {e}")
             return render_template('index.html', result=False, error=str(e))
 
     return render_template('index.html', result=False)
@@ -61,6 +64,9 @@ def index():
 @app.route('/download-report', methods=['POST'])
 def download_report():
     report_text = request.form.get('report_content')
+    if not report_text:
+        return "No report content found", 400
+        
     buffer = BytesIO()
     
     # PDF Setup
@@ -77,8 +83,9 @@ def download_report():
     story.append(Paragraph("VITISENSE PRO - OFFICIAL AGRONOMIST REPORT", title_style))
     story.append(Spacer(1, 12))
     
-    # Process text for PDF
-    lines = report_text.replace("**", "").replace("#", "").split('\n')
+    # Process text for PDF (Removes Markdown formatting for clean PDF display)
+    clean_text = report_text.replace("**", "").replace("#", "").replace("*", "")
+    lines = clean_text.split('\n')
     for line in lines:
         if line.strip():
             story.append(Paragraph(line, body_style))

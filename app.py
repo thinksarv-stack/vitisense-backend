@@ -49,7 +49,7 @@ def index():
 
             # Note: Changed to gemini-2.0-flash for current API stability
             response = client.models.generate_content(
-                model='gemini-2.0-flash',
+                model='gemini-2.5-flash',
                 contents=[prompt, leaf_img, grape_img]
             )
             
@@ -98,3 +98,4 @@ def download_report():
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
+

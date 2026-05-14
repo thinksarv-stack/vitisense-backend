@@ -4,3 +4,4 @@ google-genai
 Pillow
 reportlab
 gunicorn
+python-dotenv

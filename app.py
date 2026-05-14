@@ -4,6 +4,11 @@ from google import genai
 from PIL import Image
 import os
 from io import BytesIO
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # PDF Libraries
 from reportlab.lib import colors
@@ -14,18 +19,21 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 app = Flask(__name__)
 CORS(app)
 
-# SETUP GEMINI CLIENT
-API_KEY = os.environ.get("GEMINI_API_KEY")
-client = genai.Client(api_key=API_KEY)
+# SETUP GROQ CLIENT
+API_KEY = os.environ.get("GROQ_API_KEY")
+client = genai.Client(api_key=API_KEY, model='groq-2.0')
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    logger.debug("Received request at '/' endpoint")
     if request.method == 'POST':
         try:
+            logger.debug("Processing POST request")
             leaf_file = request.files['leaf_image']
             grape_file = request.files['grape_image']
             sugar = request.form.get('sugar', '15.0')
 
+            logger.debug("Files and sugar value received")
             leaf_img = Image.open(leaf_file)
             grape_img = Image.open(grape_file)
 
@@ -47,16 +55,17 @@ def index():
             Constraints: Use bullet points. Ensure every point contains 2-3 insightful, complete sentences.
             """
 
-            # Note: Changed to gemini-2.0-flash for current API stability
+            logger.debug("Prompt created for genai API")
             response = client.models.generate_content(
                 model='gemini-2.5-flash',
                 contents=[prompt, leaf_img, grape_img]
             )
-            
+
+            logger.debug("Response received from genai API")
             return render_template('index.html', result=True, report=response.text)
 
         except Exception as e:
-            print(f"Server Error: {e}")
+            logger.error(f"Error processing request: {e}")
             return render_template('index.html', result=False, error=str(e))
 
     return render_template('index.html', result=False)

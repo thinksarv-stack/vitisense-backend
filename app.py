@@ -4,11 +4,9 @@ from google import genai
 from PIL import Image
 import os
 from io import BytesIO
-import logging
+from dotenv import load_dotenv
 
-# Configure logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+load_dotenv()
 
 # PDF Libraries
 from reportlab.lib import colors
@@ -19,21 +17,18 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 app = Flask(__name__)
 CORS(app)
 
-# SETUP GROQ CLIENT
-API_KEY = os.environ.get("GROQ_API_KEY")
-client = genai.Client(api_key=API_KEY, model='groq-2.0')
+# SETUP GEMINI CLIENT
+API_KEY = os.environ.get("GEMINI_API_KEY")
+client = genai.Client(api_key=API_KEY)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    logger.debug("Received request at '/' endpoint")
     if request.method == 'POST':
         try:
-            logger.debug("Processing POST request")
             leaf_file = request.files['leaf_image']
             grape_file = request.files['grape_image']
             sugar = request.form.get('sugar', '15.0')
 
-            logger.debug("Files and sugar value received")
             leaf_img = Image.open(leaf_file)
             grape_img = Image.open(grape_file)
 
@@ -49,23 +44,22 @@ def index():
             - 🔍 SYMPTOMS: Describe the specific lesions, necrotic spots, or discoloration patterns seen on the leaf or fruit. Explain how these symptoms interfere with photosynthesis or fruit development.
             - 🧪 TREATMENT: Recommend specific fungicides or pesticides like Mancozeb, Myclobutanil, or Copper Hydroxide. Detail the chemical mode of action and why this particular substance is effective for the detected pathogen. 
             - 📅 SCHEDULE: Provide a precise application timeline including frequency and total duration. Explain the importance of following this window to prevent the pathogen's lifecycle from continuing or becoming resistant.
-            - 🍇 RIPENESS: Evaluate the fruit's maturity using the {sugar} Brix data and visual coloration. Compare the current stage with optimal ripeness, highlighting the balance between sugar accumulation and acid degradation at this specific stage.
+            - 🍇 RIPENESS: Perform a comparative analysis of the fruit's maturity using the {sugar} Brix data versus the visual coloration. Compare the current balance of sugar accumulation and acid degradation against optimal harvest parameters.
             - 📊 MARKET: Determine the commercial destination based on quality and ripeness. Provide a final recommendation on whether to harvest immediately, wait for better parameters, or treat and re-evaluate.
 
             Constraints: Use bullet points. Ensure every point contains 2-3 insightful, complete sentences.
             """
 
-            logger.debug("Prompt created for genai API")
+            # Note: Changed to gemini-1.5-flash for free tier compatibility
             response = client.models.generate_content(
                 model='gemini-2.5-flash',
                 contents=[prompt, leaf_img, grape_img]
             )
-
-            logger.debug("Response received from genai API")
+            
             return render_template('index.html', result=True, report=response.text)
 
         except Exception as e:
-            logger.error(f"Error processing request: {e}")
+            print(f"Server Error: {e}")
             return render_template('index.html', result=False, error=str(e))
 
     return render_template('index.html', result=False)

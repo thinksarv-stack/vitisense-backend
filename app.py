@@ -41,7 +41,7 @@ def index():
             - 🔍 SYMPTOMS: Describe the specific lesions, necrotic spots, or discoloration patterns seen on the leaf or fruit. Explain how these symptoms interfere with photosynthesis or fruit development.
             - 🧪 TREATMENT: Recommend specific fungicides or pesticides like Mancozeb, Myclobutanil, or Copper Hydroxide. Detail the chemical mode of action and why this particular substance is effective for the detected pathogen. 
             - 📅 SCHEDULE: Provide a precise application timeline including frequency and total duration. Explain the importance of following this window to prevent the pathogen's lifecycle from continuing or becoming resistant.
-            - 🍇 RIPENESS: Evaluate the fruit's maturity using the {sugar} Brix data and visual coloration. Discuss the balance between sugar accumulation and acid degradation at this specific stage.
+            - 🍇 RIPENESS: Evaluate the fruit's maturity using the {sugar} Brix data and visual coloration. Compare the current stage with optimal ripeness, highlighting the balance between sugar accumulation and acid degradation at this specific stage.
             - 📊 MARKET: Determine the commercial destination based on quality and ripeness. Provide a final recommendation on whether to harvest immediately, wait for better parameters, or treat and re-evaluate.
 
             Constraints: Use bullet points. Ensure every point contains 2-3 insightful, complete sentences.
